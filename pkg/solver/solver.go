@@ -31,6 +31,11 @@ func (s *Solver) Solve(b *types.Board) error {
 			}
 
 			if cell != nil {
+				//val := "nil"
+				//if cell.Value != nil {
+				//	val = fmt.Sprintf("%d", *cell.Value)
+				//}
+				//fmt.Printf("%d %d %s %v\n", cell.Row, cell.Column, val, cell.Candidates)
 				b.UpdateCell(cell)
 				anyStrategyWorked = true
 

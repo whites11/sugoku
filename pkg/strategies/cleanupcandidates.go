@@ -1,8 +1,6 @@
 package strategies
 
 import (
-	"reflect"
-
 	"github.com/whites11/sugoku/pkg/types"
 )
 
@@ -13,31 +11,43 @@ func NewCleanupCandidates() *CleanupCandidates {
 	return &CleanupCandidates{}
 }
 
+func cleanupCandidatesStrategy(section types.Section) (*types.Cell, error) {
+	// Collect values in the section.
+	vals := make([]uint8, 0)
+	for _, cell := range section.Cells() {
+		if cell.Value != nil {
+			vals = append(vals, *cell.Value)
+		}
+	}
+
+	// Remove values from other cells in the section.
+	for _, cell := range section.Cells() {
+		if cell.Value == nil {
+			newCandidates := cell.Candidates
+			for _, candidate := range vals {
+				newCandidates = remove(newCandidates, candidate)
+			}
+
+			if len(newCandidates) != len(cell.Candidates) {
+				cell.Candidates = newCandidates
+				return &cell, nil
+			}
+		}
+	}
+
+	return nil, nil
+}
+
 func (s *CleanupCandidates) Step(b *types.Board) (*types.Cell, error) {
 	// Rows
 	{
 		for _, row := range b.Rows() {
-			// Collect values in the row
-			vals := make([]uint8, 0)
-			for _, cell := range row.Cells() {
-				if cell.Value != nil {
-					vals = append(vals, *cell.Value)
-				}
+			cell, err := cleanupCandidatesStrategy(&row)
+			if err != nil {
+				return nil, err
 			}
-
-			// Remove values from other cells in the row.
-			for _, cell := range row.Cells() {
-				if cell.Value == nil {
-					newCandidates := cell.Candidates
-					for _, candidate := range vals {
-						newCandidates = remove(newCandidates, candidate)
-					}
-
-					if !reflect.DeepEqual(newCandidates, cell.Candidates) {
-						cell.Candidates = newCandidates
-						return &cell, nil
-					}
-				}
+			if cell != nil {
+				return cell, nil
 			}
 		}
 	}
@@ -45,27 +55,12 @@ func (s *CleanupCandidates) Step(b *types.Board) (*types.Cell, error) {
 	// Columns
 	{
 		for _, column := range b.Columns() {
-			// Collect values in the column
-			vals := make([]uint8, 0)
-			for _, cell := range column.Cells() {
-				if cell.Value != nil {
-					vals = append(vals, *cell.Value)
-				}
+			cell, err := cleanupCandidatesStrategy(&column)
+			if err != nil {
+				return nil, err
 			}
-
-			// Remove values from other cells in the row.
-			for _, cell := range column.Cells() {
-				if cell.Value == nil {
-					newCandidates := cell.Candidates
-					for _, candidate := range vals {
-						newCandidates = remove(newCandidates, candidate)
-					}
-
-					if len(newCandidates) != len(cell.Candidates) {
-						cell.Candidates = newCandidates
-						return &cell, nil
-					}
-				}
+			if cell != nil {
+				return cell, nil
 			}
 		}
 	}
@@ -73,27 +68,12 @@ func (s *CleanupCandidates) Step(b *types.Board) (*types.Cell, error) {
 	// Squares
 	{
 		for _, square := range b.Squares() {
-			// Collect values in the square
-			vals := make([]uint8, 0)
-			for _, cell := range square.Cells() {
-				if cell.Value != nil {
-					vals = append(vals, *cell.Value)
-				}
+			cell, err := cleanupCandidatesStrategy(&square)
+			if err != nil {
+				return nil, err
 			}
-
-			// Remove values from other cells in the row.
-			for _, cell := range square.Cells() {
-				if cell.Value == nil {
-					newCandidates := cell.Candidates
-					for _, candidate := range vals {
-						newCandidates = remove(newCandidates, candidate)
-					}
-
-					if len(newCandidates) != len(cell.Candidates) {
-						cell.Candidates = newCandidates
-						return &cell, nil
-					}
-				}
+			if cell != nil {
+				return cell, nil
 			}
 		}
 	}

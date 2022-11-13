@@ -16,5 +16,6 @@ func (c *Cell) String() string {
 		val = fmt.Sprint(*c.Value)
 	}
 
+	//return fmt.Sprintf("%s", val)
 	return fmt.Sprintf("%s %v", val, c.Candidates)
 }

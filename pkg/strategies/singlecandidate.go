@@ -13,7 +13,7 @@ func NewSingleCandidate() *SingleCandidate {
 
 func (s *SingleCandidate) Step(b *types.Board) (*types.Cell, error) {
 	for _, cell := range b.Cells() {
-		if len(cell.Candidates) == 1 {
+		if cell.Value == nil && len(cell.Candidates) == 1 {
 			val := cell.Candidates[0]
 			cell.Value = &val
 			return &cell, nil
